@@ -15,4 +15,6 @@ class AppColors {
   static const Color card = Color(0xFFC7F1FB);         // Light blue
   static const Color primary = Color(0xFF0077C0);      // Blue (button)
   static const Color text = Color(0xFF1A1F71);  
+  static const Color black = Color.fromARGB(255, 0, 0, 0);  
+  static const Color white = Color.fromARGB(255, 255, 255, 255);  
 }

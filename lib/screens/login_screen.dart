@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/routes.dart';
 import 'package:myapp/utils/app_colors.dart';
+import 'package:myapp/services/auth_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFCDD2), // Light pink
+      backgroundColor: const Color(0xFFFFCDD2),
       body: SafeArea(
         child: Stack(
           children: [
-            // Optional: background image at the bottom
             Align(
               alignment: Alignment.bottomCenter,
               child: Opacity(
                 opacity: 0.3,
                 child: Image.asset(
-                  'assets/img/family.png', // replace with your asset path
+                  'assets/img/family.png',
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
               ),
             ),
-
-            // Content
             SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Column(
@@ -41,25 +49,18 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 30),
-
-                  // Social buttons
                   _buildSocialButton('Login with Facebook'),
                   _buildSocialButton('Login with Google'),
                   _buildSocialButton('Login with Apple'),
-
                   const SizedBox(height: 20),
-
-                  // Email field
-                  _buildTextField(label: 'Email'),
-
+                  _buildTextField(
+                      label: 'Email', controller: _emailController),
                   const SizedBox(height: 12),
-
-                  // Password field
-                  _buildTextField(label: 'Password', obscure: true),
-
+                  _buildTextField(
+                      label: 'Password',
+                      obscure: true,
+                      controller: _passwordController),
                   const SizedBox(height: 20),
-
-                  // Login Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -70,20 +71,48 @@ class LoginScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: () {Navigator.pushNamed(context, Routes.dashboard);},
-                      child: const Text('Login',
+                      onPressed: () async {
+                        final email = _emailController.text;
+                        final password = _passwordController.text;
+
+                        final result = await _authService.login(email, password);
+
+                        if (result != null) {
+                          // Login successful
+                          Fluttertoast.showToast(
+                              msg: "Login Successful!",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.green,
+                              textColor: Colors.white,
+                              fontSize: 16.0
+                          );
+                          Navigator.pushNamed(context, Routes.dashboard);
+                        } else {
+                          // Login failed
+                          Fluttertoast.showToast(
+                              msg: "Login Failed. Please check your credentials.",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'Login',
                         style: TextStyle(
-                          color: Colors.white, // Set text color to white
+                          color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
-                  // Sign up link
                   const Text.rich(
                     TextSpan(
                       text: 'Need an account? ',
@@ -99,16 +128,12 @@ class LoginScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
-                  // Terms & policy
                   const Text(
                     'By signing in you agree to Kid Track Privacy Policy and T&C',
                     style: TextStyle(fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
-
                   const SizedBox(height: 30),
                 ],
               ),
@@ -142,8 +167,10 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField({required String label, bool obscure = false}) {
+  Widget _buildTextField(
+      {required String label, bool obscure = false, TextEditingController? controller}) {
     return TextField(
+      controller: controller,
       obscureText: obscure,
       decoration: InputDecoration(
         labelText: label,

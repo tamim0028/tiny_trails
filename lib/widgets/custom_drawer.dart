@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/routes.dart';
 import 'package:myapp/utils/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:myapp/services/auth_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -108,8 +111,25 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),
-            onTap: () {
-              // TODO: Implement logout functionality
+            onTap: () async {
+              AuthService authService = AuthService();
+              bool loggedOut = await authService.logout();
+
+              if (loggedOut) {
+                Fluttertoast.showToast(
+                    msg: "Logout Successful!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+                // Navigate to the login screen
+                Navigator.pushReplacementNamed(context, Routes.login);
+              } else {
+                // Handle logout failure
+                print('Logout failed!');
+              }
             },
           ),
         ],
